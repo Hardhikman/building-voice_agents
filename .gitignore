@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (for frontend)
+node_modules/
+.next/
+out/
+build/
+
+# Logs
+*.log
+logs/
+KMS/logs/
+
+# Project specific
+orders/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!components.json
+!renovate.json
+
+# Lock files (keep these)
+!pnpm-lock.yaml
+!uv.lock
