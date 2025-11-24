@@ -93,6 +93,27 @@ async with stdio_client(server_params) as (read, write):
    - References past mood and goals
    - Personalized conversation continuity
 
+
+---
+
+## 🏗️ Architecture & Technologies
+
+### Key Technologies Stack
+- **LiveKit Agents SDK**: Voice pipeline orchestration
+- **MCP (Model Context Protocol)**: External tool integration framework
+- **SQLite3**: Lightweight embedded database for persistence
+- **Google Gemini 2.5 Flash Lite**: LLM for natural conversation
+- **Murf TTS (Matthew voice)**: Natural voice synthesis with conversational style
+- **Cartesia STT (ink-whisper)**: Fast speech recognition
+- **FastMCP**: Python framework for building MCP servers
+
+### MCP Server Components
+1. **wellness_db_server.py**: Standalone FastMCP server
+2. **Tools Exposed**:
+   - `add_log(mood, objectives, summary)`: Insert new wellness entry
+   - `get_latest_log()`: Retrieve most recent check-in
+3. **Transport**: Stdio (spawned as subprocess by agent)
+
 ---
 
 ## 🧪 Testing & Validation
@@ -226,11 +247,34 @@ sequenceDiagram
 
 ---
 
+## 🔮 Potential Enhancements
+
+### Future Features
+1. **Weekly Reflection Tool**: Aggregate mood trends over time
+2. **Goal Tracking**: Mark objectives as completed in follow-ups
+3. **Reminder Integration**: Connect to calendar/task management via MCP
+4. **Data Visualization**: Generate mood charts from historical data
+5. **Multi-user Support**: Add user authentication and separate logs
+
+### Advanced MCP Integrations
+- **Notion MCP**: Sync wellness logs to Notion database
+- **Todoist MCP**: Convert objectives into actionable tasks
+- **Zapier MCP**: Trigger workflows based on mood patterns
+
+---
+
+## 📚 Resources
+
+- [LiveKit Agents Documentation](https://docs.livekit.io/agents/)
+- [MCP Documentation](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [Day 3 Task Requirements](file:///c:/SmartQ/ten-days-of-voice-agents-2025/challenges/Day%203%20Task.md)
+
+---
+
 ## 📝 Next Steps (Day 4)
 
 - [ ] Check Day 4 Challenge requirements
 - [ ] Plan implementation
-- [ ] Consider weekly reflection feature (aggregate mood trends)
 
 ---
 
