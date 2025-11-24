@@ -28,11 +28,13 @@ logger = logging.getLogger("agent")
 load_dotenv(".env.local")
 
 class Assistant(Agent):
-    def __init__(self, mcp_client: ClientSession) -> None:
+    def __init__(self, mcp_client: ClientSession, context_summary: str = "This is the first check-in.") -> None:
         self.mcp_client = mcp_client
         super().__init__(
-            instructions="""You are a supportive, grounded Health & Wellness Voice Companion.
+            instructions=f"""You are a supportive, grounded Health & Wellness Voice Companion.
             Your goal is to check in with the user about their mood and intentions for the day.
+            
+            Context from previous session: {context_summary}
             
             Structure your conversation:
             1. Ask about their mood and energy levels today.
@@ -89,13 +91,7 @@ async def entrypoint(ctx: JobContext):
             context_summary = "This is the first check-in."
             try:
                 result = await session.call_tool("get_latest_log", arguments={})
-                # Parse the result content
-                # MCP returns a list of content items, usually TextContent
-                # We need to inspect the structure of result
-                # For now, let's assume the tool returns a string in the first content item
                 if result and result.content:
-                     # result.content is a list of types like TextContent
-                     # We assume the first item has the text
                      content_text = result.content[0].text
                      if content_text != "No previous logs found.":
                          log_data = json.loads(content_text)
@@ -106,23 +102,8 @@ async def entrypoint(ctx: JobContext):
             except Exception as e:
                 logger.error(f"Failed to load context from MCP: {e}")
 
-            # Update instructions with context
-            instructions = f"""You are a supportive, grounded Health & Wellness Voice Companion.
-            Your goal is to check in with the user about their mood and intentions for the day.
-            
-            Context from previous session: {context_summary}
-            
-            Structure your conversation:
-            1. Ask about their mood and energy levels today.
-            2. Ask about 1-3 simple, actionable objectives for the day.
-            3. Offer brief, grounded advice or encouragement (non-medical).
-            4. Recap their mood and objectives to confirm.
-            5. Once confirmed, use the add_log tool to save the entry.
-            
-            Be warm, empathetic, and concise. Avoid medical diagnoses."""
-
-            agent = Assistant(mcp_client=session)
-            agent.instructions = instructions
+            # Create agent with context
+            agent = Assistant(mcp_client=session, context_summary=context_summary)
 
             session_agent = AgentSession(
                 stt=cartesia.STT(model="ink-whisper"),
