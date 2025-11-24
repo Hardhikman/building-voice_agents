@@ -45,6 +45,7 @@ class Assistant(Agent):
             
             Be warm, friendly, and enthusiastic about coffee! Keep responses concise and conversational.
             Do not use emojis, asterisks, or complex formatting in your responses.""",
+            functions=[self.save_order],
         )
 
     @function_tool
