@@ -58,6 +58,7 @@ orders/
 !tsconfig.json
 !components.json
 !renovate.json
+!day4_tutor_content.json
 
 # Lock files (keep these)
 !pnpm-lock.yaml
