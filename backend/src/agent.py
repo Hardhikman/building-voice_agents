@@ -112,10 +112,15 @@ class LearnAgent(Agent):
         )
         concepts_list = ", ".join([c["title"] for c in self.content])
         await self.session.generate_reply(
-            instructions=f"""Introduce yourself as the learning tutor (in a friendly way, don't be too formal).
-            Let the user know you're here to explain programming concepts.
-            Mention that you can teach them about: {concepts_list}.
-            Ask what they'd like to learn about."""
+            instructions=f"""You are now in LEARN mode. 
+            
+            IMPORTANT: Do NOT ask what they want to learn if they just told you. 
+            Continue the conversation naturally based on what they just said.
+            
+            If they already mentioned a concept, start explaining it immediately.
+            If they haven't mentioned a specific concept yet, briefly say you're ready to teach them about: {concepts_list}.
+            
+            Be conversational and natural - don't repeat questions they already answered."""
         )
 
     @function_tool()
@@ -182,10 +187,15 @@ class QuizAgent(Agent):
         )
         topics = ", ".join([c["title"] for c in self.content])
         await self.session.generate_reply(
-            instructions=f"""Introduce yourself as the quiz tutor (in a friendly, energetic way).
-            Let the user know you're here to test their knowledge.
-            Mention the topics you can quiz them on: {topics}.
-            Ask which topic they'd like to be quizzed on, or pick one and start asking a question."""
+            instructions=f"""You are now in QUIZ mode.
+            
+            IMPORTANT: Do NOT ask what topic they want if they just told you.
+            Continue the conversation naturally based on what they just said.
+            
+            If they already mentioned a topic, ask a question about it immediately.
+            If they haven't mentioned a specific topic yet, briefly say you can quiz them on: {topics}.
+            
+            Be conversational and natural - don't repeat questions they already answered."""
         )
 
     @function_tool()
@@ -262,10 +272,15 @@ class TeachBackAgent(Agent):
         )
         concepts_list = ", ".join([c["title"] for c in self.content])
         await self.session.generate_reply(
-            instructions=f"""Introduce yourself as the teach-back coach (in a warm, supportive way).
-            Explain that in this mode, THEY will teach YOU about programming concepts.
-            Mention the concepts they can explain: {concepts_list}.
-            Ask them to pick a concept and explain it to you in their own words."""
+            instructions=f"""You are now in TEACH-BACK mode.
+            
+            IMPORTANT: Do NOT ask what concept they want to explain if they just told you.
+            Continue the conversation naturally based on what they just said.
+            
+            If they already mentioned a concept, ask them to explain it to you immediately.
+            If they haven't mentioned a specific concept yet, briefly say they can teach you about: {concepts_list}.
+            
+            Be conversational and natural - don't repeat questions they already answered."""
         )
 
     @function_tool()
