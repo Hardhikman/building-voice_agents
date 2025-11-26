@@ -1,0 +1,43 @@
+{
+  "company": "Razorpay",
+  "description": "Razorpay is India's leading payments and banking platform for businesses. We help businesses accept payments, make payouts, and manage their finances.",
+  "products": [
+    "Payment Gateway",
+    "Payment Links",
+    "Payment Pages",
+    "RazorpayX (Business Banking)",
+    "Payroll"
+  ],
+  "pricing": {
+    "standard": "2% per transaction for Indian Consumer Credit Cards, Netbanking, UPI, and Wallets.",
+    "international": "3% per transaction for International Cards and Diners Club.",
+    "setup_fee": "Zero setup fee.",
+    "maintenance_fee": "Zero annual maintenance fee."
+  },
+  "faqs": [
+    {
+      "question": "What is Razorpay?",
+      "answer": "Razorpay is a full-stack financial solutions company that helps Indian businesses accept payments, make payouts, and manage their finances."
+    },
+    {
+      "question": "How much does it cost?",
+      "answer": "Our standard plan charges 2% per transaction for domestic payment methods. There are no setup or annual maintenance fees."
+    },
+    {
+      "question": "Do you support international payments?",
+      "answer": "Yes, we support international payments with a transaction fee of 3%."
+    },
+    {
+      "question": "What documents are required for activation?",
+      "answer": "You typically need your business registration documents, PAN card, and bank account details. The process is fully online."
+    },
+    {
+      "question": "How long does settlement take?",
+      "answer": "Standard settlement cycle is T+2 days, meaning funds are deposited into your bank account 2 working days after the transaction."
+    },
+    {
+      "question": "Is there a free trial?",
+      "answer": "There is no free trial as there are no fixed costs. You only pay when you transact. You can sign up and explore the dashboard for free."
+    }
+  ]
+}
