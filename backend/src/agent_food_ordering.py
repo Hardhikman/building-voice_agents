@@ -65,23 +65,6 @@ class FoodOrderingAgent(Agent):
             - Ask for clarification when needed (quantity, specific brand, etc.)
             - Confirm cart changes with the user
             - When users are done shopping, summarize their order and place it
-            - Handle special requests like "ingredients for X" intelligently by mapping them to multiple items"""
-        )
-
-    async def on_enter(self) -> None:
-        """Called when this agent becomes active."""
-        # Use a friendly voice
-        self.session.tts = murf.TTS(
-            voice="en-US-matthew",  # Friendly male voice
-            style="Conversation",
-            tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
-            text_pacing=True,
-        )
-        
-        await self.session.generate_reply(
-            instructions="""Greet the user warmly as their food & grocery ordering assistant for QuickCart.
-            Explain that you can help them order groceries and prepared foods from your catalog.
-            Mention that you can handle both specific item requests and recipe-based requests like "ingredients for a peanut butter sandwich".
             Ask how you can help them with their shopping today."""
         )
 
@@ -114,7 +97,7 @@ class FoodOrderingAgent(Agent):
             return result
         else:
             return f"I couldn't find any items matching '{query}'. Would you like to try a different search?"
-    
+
     @function_tool()
     async def add_to_cart(self, context: RunContext, item_id: str, quantity: int = 1):
         """Add an item to the shopping cart.
@@ -125,6 +108,7 @@ class FoodOrderingAgent(Agent):
         """
         # Find the item in the catalog
         item = None
+        # First try exact ID match
         for category_items in self.catalog.get("categories", {}).values():
             for catalog_item in category_items:
                 if catalog_item["id"] == item_id:
@@ -133,13 +117,38 @@ class FoodOrderingAgent(Agent):
             if item:
                 break
         
+        # If not found, try matching by name (case-insensitive)
         if not item:
-            return f"Sorry, I couldn't find an item with ID '{item_id}' in our catalog."
+            for category_items in self.catalog.get("categories", {}).values():
+                for catalog_item in category_items:
+                    if catalog_item["name"].lower() == item_id.lower():
+                        item = catalog_item
+                        break
+                if item:
+                    break
+        
+        # If still not found, try partial match
+        if not item:
+            matches = []
+            for category_items in self.catalog.get("categories", {}).values():
+                for catalog_item in category_items:
+                    if item_id.lower() in catalog_item["name"].lower():
+                        matches.append(catalog_item)
+            
+            if len(matches) == 1:
+                item = matches[0]
+            elif len(matches) > 1:
+                # Return a helpful message asking for clarification
+                options = ", ".join([m["name"] for m in matches])
+                return f"I found multiple items matching '{item_id}': {options}. Which one would you like?"
+
+        if not item:
+            return f"Sorry, I couldn't find an item with ID or name '{item_id}' in our catalog."
         
         # Check if item is already in cart
         existing_item = None
         for cart_item in self.cart:
-            if cart_item["item_id"] == item_id:
+            if cart_item["item_id"] == item["id"]:
                 existing_item = cart_item
                 break
         
@@ -150,7 +159,7 @@ class FoodOrderingAgent(Agent):
         else:
             # Add new item
             cart_item = {
-                "item_id": item_id,
+                "item_id": item["id"],
                 "name": item["name"],
                 "price": item["price"],
                 "unit": item["unit"],
@@ -168,11 +177,11 @@ class FoodOrderingAgent(Agent):
         """
         # Find and remove the item
         for i, cart_item in enumerate(self.cart):
-            if cart_item["item_id"] == item_id:
+            if cart_item["item_id"] == item_id or cart_item["name"].lower() == item_id.lower():
                 removed_item = self.cart.pop(i)
                 return f"Removed {removed_item['name']} from your cart."
         
-        return f"I couldn't find an item with ID '{item_id}' in your cart."
+        return f"I couldn't find an item with ID or name '{item_id}' in your cart."
     
     @function_tool()
     async def update_cart_quantity(self, context: RunContext, item_id: str, quantity: int):
@@ -187,12 +196,12 @@ class FoodOrderingAgent(Agent):
         
         # Find and update the item
         for cart_item in self.cart:
-            if cart_item["item_id"] == item_id:
+            if cart_item["item_id"] == item_id or cart_item["name"].lower() == item_id.lower():
                 old_quantity = cart_item["quantity"]
                 cart_item["quantity"] = quantity
                 return f"Updated {cart_item['name']} quantity from {old_quantity} to {quantity}."
         
-        return f"I couldn't find an item with ID '{item_id}' in your cart."
+        return f"I couldn't find an item with ID or name '{item_id}' in your cart."
     
     @function_tool()
     async def list_cart(self, context: RunContext):
@@ -210,7 +219,7 @@ class FoodOrderingAgent(Agent):
         
         result += f"\nCart total: ${total:.2f}"
         return result
-    
+
     @function_tool()
     async def add_recipe_ingredients(self, context: RunContext, recipe_name: str):
         """Add all ingredients for a recipe to the cart.
@@ -403,7 +412,7 @@ async def entrypoint(ctx: JobContext):
     # Create agent session
     session_agent = AgentSession(
         stt=cartesia.STT(model="ink-whisper"),
-        llm=google.LLM(model="gemini-2.5-flash-lite"),
+        llm=google.LLM(model="gemini-2.5-flash"),
         tts=murf.TTS(
             voice="en-US-matthew",
             style="Conversation",
