@@ -1,0 +1,808 @@
+Help on class Agent in module livekit.agents.voice.agent:
+
+class Agent(builtins.object)
+ |  Agent(
+ |      *,
+ |      instructions: 'str',
+ |      id: 'str | None' = None,
+ |      chat_ctx: 'NotGivenOr[llm.ChatContext | None]' = NOT_GIVEN,
+ |      tools: 'list[llm.FunctionTool | llm.RawFunctionTool] | None' = None,
+ |      turn_detection: 'NotGivenOr[TurnDetectionMode | None]' = NOT_GIVEN,
+ |      stt: 'NotGivenOr[stt.STT | STTModels | str | None]' = NOT_GIVEN,
+ |      vad: 'NotGivenOr[vad.VAD | None]' = NOT_GIVEN,
+ |      llm: 'NotGivenOr[llm.LLM | llm.RealtimeModel | LLMModels | str | None]' = NOT_GIVEN,
+ |      tts: 'NotGivenOr[tts.TTS | TTSModels | str | None]' = NOT_GIVEN,
+ |      mcp_servers: 'NotGivenOr[list[mcp.MCPServer] | None]' = NOT_GIVEN,
+ |      allow_interruptions: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      min_consecutive_speech_delay: 'NotGivenOr[float]' = NOT_GIVEN,
+ |      use_tts_aligned_transcript: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      min_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN,
+ |      max_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN
+ |  ) -> 'None'
+ |
+ |  Methods defined here:
+ |
+ |  __init__(
+ |      self,
+ |      *,
+ |      instructions: 'str',
+ |      id: 'str | None' = None,
+ |      chat_ctx: 'NotGivenOr[llm.ChatContext | None]' = NOT_GIVEN,
+ |      tools: 'list[llm.FunctionTool | llm.RawFunctionTool] | None' = None,
+ |      turn_detection: 'NotGivenOr[TurnDetectionMode | None]' = NOT_GIVEN,
+ |      stt: 'NotGivenOr[stt.STT | STTModels | str | None]' = NOT_GIVEN,
+ |      vad: 'NotGivenOr[vad.VAD | None]' = NOT_GIVEN,
+ |      llm: 'NotGivenOr[llm.LLM | llm.RealtimeModel | LLMModels | str | None]' = NOT_GIVEN,
+ |      tts: 'NotGivenOr[tts.TTS | TTSModels | str | None]' = NOT_GIVEN,
+ |      mcp_servers: 'NotGivenOr[list[mcp.MCPServer] | None]' = NOT_GIVEN,
+ |      allow_interruptions: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      min_consecutive_speech_delay: 'NotGivenOr[float]' = NOT_GIVEN,
+ |      use_tts_aligned_transcript: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      min_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN,
+ |      max_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN
+ |  ) -> 'None'
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |
+ |  llm_node(
+ |      self,
+ |      chat_ctx: 'llm.ChatContext',
+ |      tools: 'list[FunctionTool | RawFunctionTool]',
+ |      model_settings: 'ModelSettings'
+ |  ) -> 'AsyncIterable[llm.ChatChunk | str | FlushSentinel] | Coroutine[Any, Any, AsyncIterable[llm.ChatChunk | str | FlushSentinel]] | Coroutine[Any, Any, str] | Coroutine[Any, Any, llm.ChatChunk] | Coroutine[Any, Any, None]'
+ |      A node in the processing pipeline that processes text generation with an LLM.
+ |
+ |      By default, this node uses the agent's LLM to process the provided context. It may yield
+ |      plain text (as `str`) for straightforward text generation, or `llm.ChatChunk` objects that
+ |      can include text and optional tool calls. `ChatChunk` is helpful for capturing more complex
+ |      outputs such as function calls, usage statistics, or other metadata.
+ |
+ |      You can override this node to customize how the LLM is used or how tool invocations
+ |      and responses are handled.
+ |
+ |      Args:
+ |          chat_ctx (llm.ChatContext): The context for the LLM (the conversation history).
+ |          tools (list[FunctionTool]): A list of callable tools that the LLM may invoke.
+ |          model_settings (ModelSettings): Configuration and parameters for model execution.
+ |
+ |      Yields/Returns:
+ |          str: Plain text output from the LLM.
+ |          llm.ChatChunk: An object that can contain both text and optional tool calls.
+ |
+ |  async on_enter(self) -> 'None'
+ |      Called when the task is entered
+ |
+ |  async on_exit(self) -> 'None'
+ |      Called when the task is exited
+ |
+ |  async on_user_turn_completed(
+ |      self,
+ |      turn_ctx: 'llm.ChatContext',
+ |      new_message: 'llm.ChatMessage'
+ |  ) -> 'None'
+ |      Called when the user has finished speaking, and the LLM is about to respond
+ |
+ |      This is a good opportunity to update the chat context or edit the new message before it is
+ |      sent to the LLM.
+ |
+ |  realtime_audio_output_node(
+ |      self,
+ |      audio: 'AsyncIterable[rtc.AudioFrame]',
+ |      model_settings: 'ModelSettings'
+ |  ) -> 'AsyncIterable[rtc.AudioFrame] | Coroutine[Any, Any, AsyncIterable[rtc.AudioFrame]] | Coroutine[Any, Any, None]'
+ |      A node processing the audio from the realtime LLM session before it is played out.
+ |
+ |  stt_node(
+ |      self,
+ |      audio: 'AsyncIterable[rtc.AudioFrame]',
+ |      model_settings: 'ModelSettings'
+ |  ) -> 'AsyncIterable[stt.SpeechEvent | str] | Coroutine[Any, Any, AsyncIterable[stt.SpeechEvent | str]] | Coroutine[Any, Any, None]'
+ |      A node in the processing pipeline that transcribes audio frames into speech events.
+ |
+ |      By default, this node uses a Speech-To-Text (STT) capability from the current agent.
+ |      If the STT implementation does not support streaming natively, a VAD (Voice Activity
+ |      Detection) mechanism is required to wrap the STT.
+ |
+ |      You can override this node with your own implementation for more flexibility (e.g.,
+ |      custom pre-processing of audio, additional buffering, or alternative STT strategies).
+ |
+ |      Args:
+ |          audio (AsyncIterable[rtc.AudioFrame]): An asynchronous stream of audio frames.
+ |          model_settings (ModelSettings): Configuration and parameters for model execution.
+ |
+ |      Yields:
+ |          stt.SpeechEvent: An event containing transcribed text or other STT-related data.
+ |
+ |  transcription_node(
+ |      self,
+ |      text: 'AsyncIterable[str | TimedString]',
+ |      model_settings: 'ModelSettings'
+ |  ) -> 'AsyncIterable[str | TimedString] | Coroutine[Any, Any, AsyncIterable[str | TimedString]] | Coroutine[Any, Any, None]'
+ |      A node in the processing pipeline that finalizes transcriptions from text segments.
+ |
+ |      This node can be used to adjust or post-process text coming from an LLM (or any other
+ |      source) into a final transcribed form. For instance, you might clean up formatting, fix
+ |      punctuation, or perform any other text transformations here.
+ |
+ |      You can override this node to customize post-processing logic according to your needs.
+ |
+ |      Args:
+ |          text (AsyncIterable[str | TimedString]): An asynchronous stream of text segments.
+ |          model_settings (ModelSettings): Configuration and parameters for model execution.
+ |
+ |      Yields:
+ |          str: Finalized or post-processed text segments.
+ |
+ |  tts_node(self, text: 'AsyncIterable[str]', model_settings: 'ModelSettings') -> 'AsyncIterable[rtc.AudioFrame] | Coroutine[Any, Any, AsyncIterable[rtc.AudioFrame]] | Coroutine[Any, Any, None]'
+ |      A node in the processing pipeline that synthesizes audio from text segments.
+ |
+ |      By default, this node converts incoming text into audio frames using the Text-To-Speech
+ |      from the agent.
+ |      If the TTS implementation does not support streaming natively, it uses a sentence tokenizer
+ |      to split text for incremental synthesis.
+ |
+ |      You can override this node to provide different text chunking behavior, a custom TTS engine,
+ |      or any other specialized processing.
+ |
+ |      Args:
+ |          text (AsyncIterable[str]): An asynchronous stream of text segments to be synthesized.
+ |          model_settings (ModelSettings): Configuration and parameters for model execution.
+ |
+ |      Yields:
+ |          rtc.AudioFrame: Audio frames synthesized from the provided text.
+ |
+ |  async update_chat_ctx(
+ |      self,
+ |      chat_ctx: 'llm.ChatContext',
+ |      *,
+ |      exclude_invalid_function_calls: 'bool' = True
+ |  ) -> 'None'
+ |      Updates the agent's chat context.
+ |
+ |      If the agent is running in realtime mode, this method also updates
+ |      the chat context for the ongoing realtime session.
+ |
+ |      Args:
+ |          chat_ctx (llm.ChatContext):
+ |              The new or updated chat context for the agent.
+ |          exclude_invalid_function_calls (bool): Whether to exclude function calls
+ |              and outputs not from the agent's tools.
+ |
+ |      Raises:
+ |          llm.RealtimeError: If updating the realtime session chat context fails.
+ |
+ |  async update_instructions(self, instructions: 'str') -> 'None'
+ |      Updates the agent's instructions.
+ |
+ |      If the agent is running in realtime mode, this method also updates
+ |      the instructions for the ongoing realtime session.
+ |
+ |      Args:
+ |          instructions (str):
+ |              The new instructions to set for the agent.
+ |
+ |      Raises:
+ |          llm.RealtimeError: If updating the realtime session instructions fails.
+ |
+ |  async update_tools(self, tools: 'list[llm.FunctionTool | llm.RawFunctionTool]') -> 'None'
+ |      Updates the agent's available function tools.
+ |
+ |      If the agent is running in realtime mode, this method also updates
+ |      the tools for the ongoing realtime session.
+ |
+ |      Args:
+ |          tools (list[llm.FunctionTool]):
+ |              The new list of function tools available to the agent.
+ |
+ |      Raises:
+ |          llm.RealtimeError: If updating the realtime session tools fails.
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties defined here:
+ |
+ |  allow_interruptions
+ |      Indicates whether interruptions (e.g., stopping TTS playback) are allowed.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a value for
+ |      allowing interruptions, the session's value will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[bool]: Whether interruptions are permitted.
+ |
+ |  chat_ctx
+ |      Provides a read-only view of the agent's current chat context.
+ |
+ |      Returns:
+ |          llm.ChatContext: A read-only version of the agent's conversation history.
+ |
+ |      See Also:
+ |          update_chat_ctx: Method to update the internal chat context.
+ |
+ |  id
+ |
+ |  instructions
+ |      Returns:
+ |          str: The core instructions that guide the agent's behavior.
+ |
+ |  label
+ |
+ |  llm
+ |      Retrieves the Language Model or RealtimeModel used for text generation.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides an LLM or RealtimeModel,
+ |      the session's model will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[llm.LLM | llm.RealtimeModel | None]: The language model for text generation.
+ |
+ |  max_endpointing_delay
+ |      Maximum time-in-seconds the agent will wait before terminating the turn.
+ |
+ |      If this property was set at Agent creation, it will be used at runtime instead of the session's value.
+ |
+ |  mcp_servers
+ |      Retrieves the list of Model Context Protocol (MCP) servers providing external tools.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides MCP servers,
+ |      the session's MCP servers will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[list[mcp.MCPServer]]: An optional list of MCP servers.
+ |
+ |  min_consecutive_speech_delay
+ |      Retrieves the minimum consecutive speech delay for the agent.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a value for
+ |      the minimum consecutive speech delay, the session's value will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[float]: The minimum consecutive speech delay.
+ |
+ |  min_endpointing_delay
+ |      Minimum time-in-seconds the agent must wait after a potential end-of-utterance signal
+ |      before it declares the user’s turn complete.
+ |
+ |      If this property was set at Agent creation, it will be used at runtime instead of the session's value.
+ |
+ |  realtime_llm_session
+ |      Retrieve the realtime LLM session associated with the current agent.
+ |
+ |      Raises:
+ |          RuntimeError: If the agent is not running or the realtime LLM session is not available
+ |
+ |  session
+ |      Retrieve the VoiceAgent associated with the current agent.
+ |
+ |      Raises:
+ |          RuntimeError: If the agent is not running
+ |
+ |  stt
+ |      Retrieves the Speech-To-Text component for the agent.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides an STT component,
+ |      the session's STT will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[stt.STT | None]: An optional STT component.
+ |
+ |  tools
+ |      Returns:
+ |          list[llm.FunctionTool | llm.RawFunctionTool]:
+ |              A list of function tools available to the agent.
+ |
+ |  tts
+ |      Retrieves the Text-To-Speech component for the agent.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a TTS component,
+ |      the session's TTS will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[tts.TTS | None]: An optional TTS component for generating audio output.
+ |
+ |  turn_detection
+ |      Retrieves the turn detection mode for identifying conversational turns.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a turn detection,
+ |      the session's turn detection mode will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[TurnDetectionMode | None]: An optional turn detection mode for managing conversation flow.
+ |
+ |  use_tts_aligned_transcript
+ |      Indicates whether to use TTS-aligned transcript as the input of
+ |      the ``transcription_node``.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a value for
+ |      the use of TTS-aligned transcript, the session's value will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[bool]: Whether to use TTS-aligned transcript.
+ |
+ |  vad
+ |      Retrieves the Voice Activity Detection component for the agent.
+ |
+ |      If this property was not set at Agent creation, but an ``AgentSession`` provides a VAD component,
+ |      the session's VAD will be used at runtime instead.
+ |
+ |      Returns:
+ |          NotGivenOr[vad.VAD | None]: An optional VAD component for detecting voice activity.
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __dict__
+ |      dictionary for instance variables
+ |
+ |  __weakref__
+ |      list of weak references to the object
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  default = <class 'livekit.agents.voice.agent.Agent.default'>
+
+Help on class AgentSession in module livekit.agents.voice.agent_session:
+
+class AgentSession(livekit.rtc.event_emitter.EventEmitter, typing.Generic)
+ |  AgentSession(
+ |      *,
+ |      turn_detection: 'NotGivenOr[TurnDetectionMode]' = NOT_GIVEN,
+ |      stt: 'NotGivenOr[stt.STT | STTModels | str]' = NOT_GIVEN,
+ |      vad: 'NotGivenOr[vad.VAD]' = NOT_GIVEN,
+ |      llm: 'NotGivenOr[llm.LLM | llm.RealtimeModel | LLMModels | str]' = NOT_GIVEN,
+ |      tts: 'NotGivenOr[tts.TTS | TTSModels | str]' = NOT_GIVEN,
+ |      tools: 'NotGivenOr[list[llm.FunctionTool | llm.RawFunctionTool]]' = NOT_GIVEN,
+ |      mcp_servers: 'NotGivenOr[list[mcp.MCPServer]]' = NOT_GIVEN,
+ |      userdata: 'NotGivenOr[Userdata_T]' = NOT_GIVEN,
+ |      allow_interruptions: 'bool' = True,
+ |      discard_audio_if_uninterruptible: 'bool' = True,
+ |      min_interruption_duration: 'float' = 0.5,
+ |      min_interruption_words: 'int' = 0,
+ |      min_endpointing_delay: 'float' = 0.5,
+ |      max_endpointing_delay: 'float' = 3.0,
+ |      max_tool_steps: 'int' = 3,
+ |      video_sampler: 'NotGivenOr[_VideoSampler | None]' = NOT_GIVEN,
+ |      user_away_timeout: 'float | None' = 15.0,
+ |      false_interruption_timeout: 'float | None' = 2.0,
+ |      resume_false_interruption: 'bool' = True,
+ |      min_consecutive_speech_delay: 'float' = 0.0,
+ |      use_tts_aligned_transcript: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      tts_text_transforms: 'NotGivenOr[Sequence[TextTransforms] | None]' = NOT_GIVEN,
+ |      preemptive_generation: 'bool' = False,
+ |      ivr_detection: 'bool' = False,
+ |      conn_options: 'NotGivenOr[SessionConnectOptions]' = NOT_GIVEN,
+ |      loop: 'asyncio.AbstractEventLoop | None' = None,
+ |      agent_false_interruption_timeout: 'NotGivenOr[float | None]' = NOT_GIVEN
+ |  ) -> 'None'
+ |
+ |  Method resolution order:
+ |      AgentSession
+ |      livekit.rtc.event_emitter.EventEmitter
+ |      typing.Generic
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  async __aenter__(self) -> 'AgentSession'
+ |
+ |  async __aexit__(
+ |      self,
+ |      exc_type: 'type[BaseException] | None',
+ |      exc: 'BaseException | None',
+ |      exc_tb: 'TracebackType | None'
+ |  ) -> 'None'
+ |
+ |  __init__(
+ |      self,
+ |      *,
+ |      turn_detection: 'NotGivenOr[TurnDetectionMode]' = NOT_GIVEN,
+ |      stt: 'NotGivenOr[stt.STT | STTModels | str]' = NOT_GIVEN,
+ |      vad: 'NotGivenOr[vad.VAD]' = NOT_GIVEN,
+ |      llm: 'NotGivenOr[llm.LLM | llm.RealtimeModel | LLMModels | str]' = NOT_GIVEN,
+ |      tts: 'NotGivenOr[tts.TTS | TTSModels | str]' = NOT_GIVEN,
+ |      tools: 'NotGivenOr[list[llm.FunctionTool | llm.RawFunctionTool]]' = NOT_GIVEN,
+ |      mcp_servers: 'NotGivenOr[list[mcp.MCPServer]]' = NOT_GIVEN,
+ |      userdata: 'NotGivenOr[Userdata_T]' = NOT_GIVEN,
+ |      allow_interruptions: 'bool' = True,
+ |      discard_audio_if_uninterruptible: 'bool' = True,
+ |      min_interruption_duration: 'float' = 0.5,
+ |      min_interruption_words: 'int' = 0,
+ |      min_endpointing_delay: 'float' = 0.5,
+ |      max_endpointing_delay: 'float' = 3.0,
+ |      max_tool_steps: 'int' = 3,
+ |      video_sampler: 'NotGivenOr[_VideoSampler | None]' = NOT_GIVEN,
+ |      user_away_timeout: 'float | None' = 15.0,
+ |      false_interruption_timeout: 'float | None' = 2.0,
+ |      resume_false_interruption: 'bool' = True,
+ |      min_consecutive_speech_delay: 'float' = 0.0,
+ |      use_tts_aligned_transcript: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      tts_text_transforms: 'NotGivenOr[Sequence[TextTransforms] | None]' = NOT_GIVEN,
+ |      preemptive_generation: 'bool' = False,
+ |      ivr_detection: 'bool' = False,
+ |      conn_options: 'NotGivenOr[SessionConnectOptions]' = NOT_GIVEN,
+ |      loop: 'asyncio.AbstractEventLoop | None' = None,
+ |      agent_false_interruption_timeout: 'NotGivenOr[float | None]' = NOT_GIVEN
+ |  ) -> 'None'
+ |      `AgentSession` is the LiveKit Agents runtime that glues together
+ |      media streams, speech/LLM components, and tool orchestration into a
+ |      single real-time voice agent.
+ |
+ |      It links audio, video, and text I/O with STT, VAD, TTS, and the LLM;
+ |      handles turn detection, endpointing, interruptions, and multi-step
+ |      tool calls; and exposes everything through event callbacks so you can
+ |      focus on writing function tools and simple hand-offs rather than
+ |      low-level streaming logic.
+ |
+ |      Args:
+ |          turn_detection (TurnDetectionMode, optional): Strategy for deciding
+ |              when the user has finifshed speaking.
+ |
+ |              * ``"stt"`` – rely on speech-to-text end-of-utterance cues
+ |              * ``"vad"`` – rely on Voice Activity Detection start/stop cues
+ |              * ``"realtime_llm"`` – use server-side detection from a
+ |                realtime LLM
+ |              * ``"manual"`` – caller controls turn boundaries explicitly
+ |              * ``_TurnDetector`` instance – plug-in custom detector
+ |
+ |              If *NOT_GIVEN*, the session chooses the best available mode in
+ |              priority order ``realtime_llm \u2192 vad \u2192 stt \u2192 manual``; it
+ |              automatically falls back if the necessary model is missing.
+ |          stt (stt.STT | str, optional): Speech-to-text backend.
+ |          vad (vad.VAD, optional): Voice-activity detector
+ |          llm (llm.LLM | llm.RealtimeModel | str, optional): LLM or RealtimeModel
+ |          tts (tts.TTS | str, optional): Text-to-speech engine.
+ |          tools (list[llm.FunctionTool | llm.RawFunctionTool], optional): List of
+ |              tools shared by every agent in the agent session.
+ |          mcp_servers (list[mcp.MCPServer], optional): List of MCP servers
+ |              providing external tools for the agent to use.
+ |          userdata (Userdata_T, optional): Arbitrary per-session user data.
+ |          allow_interruptions (bool): Whether the user can interrupt the
+ |              agent mid-utterance. Default ``True``.
+ |          discard_audio_if_uninterruptible (bool): When ``True``, buffered
+ |              audio is dropped while the agent is speaking and cannot be
+ |              interrupted. Default ``True``.
+ |          min_interruption_duration (float): Minimum speech length (s) to
+ |              register as an interruption. Default ``0.5`` s.
+ |          min_interruption_words (int): Minimum number of words to consider
+ |              an interruption, only used if stt enabled. Default ``0``.
+ |          min_endpointing_delay (float): Minimum time-in-seconds the agent
+ |              must wait after a potential end-of-utterance signal (from VAD
+ |              or an EOU model) before it declares the user’s turn complete.
+ |              Default ``0.5`` s.
+ |          max_endpointing_delay (float): Maximum time-in-seconds the agent
+ |              will wait before terminating the turn. Default ``3.0`` s.
+ |          max_tool_steps (int): Maximum consecutive tool calls per LLM turn.
+ |              Default ``3``.
+ |          video_sampler (_VideoSampler, optional): Uses
+ |              :class:`VoiceActivityVideoSampler` when *NOT_GIVEN*; that sampler
+ |              captures video at ~1 fps while the user is speaking and ~0.3 fps
+ |              when silent by default.
+ |          user_away_timeout (float, optional): If set, set the user state as
+ |              "away" after this amount of time after user and agent are silent.
+ |              Default ``15.0`` s, set to ``None`` to disable.
+ |          false_interruption_timeout (float, optional): If set, emit an
+ |              `agent_false_interruption` event after this amount of time if
+ |              the user is silent and no user transcript is detected after
+ |              the interruption. Set to ``None`` to disable. Default ``2.0`` s.
+ |          resume_false_interruption (bool): Whether to resume the false interruption
+ |              after the false_interruption_timeout. Default ``True``.
+ |          min_consecutive_speech_delay (float, optional): The minimum delay between
+ |              consecutive speech. Default ``0.0`` s.
+ |          use_tts_aligned_transcript (bool, optional): Whether to use TTS-aligned
+ |              transcript as the input of the ``transcription_node``. Only applies
+ |              if ``TTS.capabilities.aligned_transcript`` is ``True`` or ``streaming``
+ |              is ``False``. When NOT_GIVEN, it's disabled.
+ |          tts_text_transforms (Sequence[TextTransforms], optional): The transforms to apply
+ |              to the tts input text, available built-in transforms: ``"filter_markdown"``, ``"filter_emoji"``.
+ |              Set to ``None`` to disable. When NOT_GIVEN, all filters will be applied.
+ |          preemptive_generation (bool):
+ |              Whether to speculatively begin LLM and TTS requests before an end-of-turn is
+ |              detected. When True, the agent sends inference calls as soon as a user
+ |              transcript is received rather than waiting for a definitive turn boundary. This
+ |              can reduce response latency by overlapping model inference with user audio,
+ |              but may incur extra compute if the user interrupts or revises mid-utterance.
+ |              Defaults to ``False``.
+ |          ivr_detection (bool): Whether to detect if the agent is interacting with an IVR system.
+ |              Default ``False``.
+ |          conn_options (SessionConnectOptions, optional): Connection options for
+ |              stt, llm, and tts.
+ |          loop (asyncio.AbstractEventLoop, optional): Event loop to bind the
+ |              session to. Falls back to :pyfunc:`asyncio.get_event_loop()`.
+ |
+ |  async aclose(self) -> 'None'
+ |
+ |  clear_user_turn(self) -> 'None'
+ |
+ |  commit_user_turn(
+ |      self,
+ |      *,
+ |      transcript_timeout: 'float' = 2.0,
+ |      stt_flush_duration: 'float' = 2.0
+ |  ) -> 'None'
+ |      Commit the user turn and generate a reply.
+ |
+ |      Args:
+ |          transcript_timeout (float, optional): The timeout for the final transcript
+ |              to be received after committing the user turn.
+ |              Increase this value if the STT is slow to respond.
+ |          stt_flush_duration (float, optional): The duration of the silence to be appended to the STT
+ |              to flush the buffer and generate the final transcript.
+ |
+ |      Raises:
+ |          RuntimeError: If the AgentSession isn't running.
+ |
+ |  async drain(self) -> 'None'
+ |
+ |  emit(self, event: 'EventTypes', arg: 'AgentEvent') -> 'None'
+ |      Trigger all callbacks associated with the given event.
+ |
+ |      Args:
+ |          event (T): The event to emit.
+ |          *args: Positional arguments to pass to the callbacks.
+ |
+ |      Example:
+ |          Basic usage of emit:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          def greet(name):
+ |              print(f"Hello, {name}!")
+ |
+ |          emitter.on('greet', greet)
+ |          emitter.emit('greet', 'Alice')  # Output: Hello, Alice!
+ |          ```
+ |
+ |  generate_reply(
+ |      self,
+ |      *,
+ |      user_input: 'NotGivenOr[str]' = NOT_GIVEN,
+ |      instructions: 'NotGivenOr[str]' = NOT_GIVEN,
+ |      tool_choice: 'NotGivenOr[llm.ToolChoice]' = NOT_GIVEN,
+ |      allow_interruptions: 'NotGivenOr[bool]' = NOT_GIVEN
+ |  ) -> 'SpeechHandle'
+ |      Generate a reply for the agent to speak to the user.
+ |
+ |      Args:
+ |          user_input (NotGivenOr[str], optional): The user's input that may influence the reply,
+ |              such as answering a question.
+ |          instructions (NotGivenOr[str], optional): Additional instructions for generating the reply.
+ |          tool_choice (NotGivenOr[llm.ToolChoice], optional): Specifies the external tool to use when
+ |              generating the reply. If generate_reply is invoked within a function_tool, defaults to "none".
+ |          allow_interruptions (NotGivenOr[bool], optional): Indicates whether the user can interrupt this speech.
+ |
+ |      Returns:
+ |          SpeechHandle: A handle to the generated reply.
+ |
+ |  interrupt(self, *, force: 'bool' = False) -> 'asyncio.Future[None]'
+ |      Interrupt the current speech generation.
+ |
+ |      Returns:
+ |          An asyncio.Future that completes when the interruption is fully processed
+ |          and chat context has been updated.
+ |
+ |  run(self, *, user_input: 'str', output_type: 'type[Run_T] | None' = None) -> 'RunResult[Run_T]'
+ |
+ |  say(
+ |      self,
+ |      text: 'str | AsyncIterable[str]',
+ |      *,
+ |      audio: 'NotGivenOr[AsyncIterable[rtc.AudioFrame]]' = NOT_GIVEN,
+ |      allow_interruptions: 'NotGivenOr[bool]' = NOT_GIVEN,
+ |      add_to_chat_ctx: 'bool' = True
+ |  ) -> 'SpeechHandle'
+ |
+ |  shutdown(self, *, drain: 'bool' = True) -> 'None'
+ |
+ |  async start(
+ |      self,
+ |      agent: 'Agent',
+ |      *,
+ |      capture_run: 'bool' = False,
+ |      room: 'NotGivenOr[rtc.Room]' = NOT_GIVEN,
+ |      room_options: 'NotGivenOr[room_io.RoomOptions]' = NOT_GIVEN,
+ |      room_input_options: 'NotGivenOr[room_io.RoomInputOptions]' = NOT_GIVEN,
+ |      room_output_options: 'NotGivenOr[room_io.RoomOutputOptions]' = NOT_GIVEN,
+ |      record: 'NotGivenOr[bool]' = NOT_GIVEN
+ |  ) -> 'RunResult | None'
+ |      Start the voice agent.
+ |
+ |      Create a default RoomIO if the input or output audio is not already set.
+ |      If the console flag is provided, start a ChatCLI.
+ |
+ |      Args:
+ |          capture_run: Whether to return a RunResult and capture the run result during session start.
+ |          room: The room to use for input and output
+ |          room_input_options: Options for the room input
+ |          room_output_options: Options for the room output
+ |          record: Whether to record the audio
+ |
+ |  update_agent(self, agent: 'Agent') -> 'None'
+ |
+ |  update_options(
+ |      self,
+ |      *,
+ |      min_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN,
+ |      max_endpointing_delay: 'NotGivenOr[float]' = NOT_GIVEN
+ |  ) -> 'None'
+ |      Update the options for the agent session.
+ |
+ |      Args:
+ |          min_endpointing_delay (NotGivenOr[float], optional): The minimum endpointing delay.
+ |          max_endpointing_delay (NotGivenOr[float], optional): The maximum endpointing delay.
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties defined here:
+ |
+ |  agent_state
+ |
+ |  conn_options
+ |
+ |  current_agent
+ |
+ |  current_speech
+ |
+ |  history
+ |
+ |  input
+ |
+ |  llm
+ |
+ |  mcp_servers
+ |
+ |  options
+ |
+ |  output
+ |
+ |  room_io
+ |
+ |  stt
+ |
+ |  tools
+ |
+ |  tts
+ |
+ |  turn_detection
+ |
+ |  user_state
+ |
+ |  vad
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  userdata
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  __orig_bases__ = (livekit.rtc.event_emitter.EventEmitter[typing.Li..._...
+ |
+ |  __parameters__ = (~Userdata_T,)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from livekit.rtc.event_emitter.EventEmitter:
+ |
+ |  off(self, event: -T_contra, callback: Callable) -> None
+ |      Unregister a callback from an event.
+ |
+ |      Args:
+ |          event (T): The event to stop listening to.
+ |          callback (Callable): The callback to remove.
+ |
+ |      Example:
+ |          Removing a callback:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          def greet(name):
+ |              print(f"Hello, {name}!")
+ |
+ |          emitter.on('greet', greet)
+ |          emitter.off('greet', greet)
+ |          emitter.emit('greet', 'Dave')  # No output, callback was removed
+ |          ```
+ |
+ |  on(self, event: -T_contra, callback: Optional[Callable] = None) -> Callable
+ |      Register a callback to be called whenever the event is emitted.
+ |
+ |      If a callback is provided, it registers the callback directly.
+ |      If no callback is provided, it returns a decorator for use with function definitions.
+ |
+ |      Args:
+ |          event (T): The event to listen for.
+ |          callback (Callable, optional): The callback to register. Defaults to None.
+ |
+ |      Returns:
+ |          Callable: The registered callback or a decorator if callback is None.
+ |
+ |      Example:
+ |          Using on with a direct callback:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          def greet(name):
+ |              print(f"Hello, {name}!")
+ |
+ |          emitter.on('greet', greet)
+ |          emitter.emit('greet', 'Charlie')  # Output: Hello, Charlie!
+ |          ```
+ |
+ |          Using on as a decorator:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          @emitter.on('greet')
+ |          def greet(name):
+ |              print(f"Hello, {name}!")
+ |
+ |          emitter.emit('greet', 'Charlie')  # Output: Hello, Charlie!
+ |          ```
+ |
+ |  once(self, event: -T_contra, callback: Optional[Callable] = None) -> Callable
+ |      Register a callback to be called only once when the event is emitted.
+ |
+ |      If a callback is provided, it registers the callback directly.
+ |      If no callback is provided, it returns a decorator for use with function definitions.
+ |
+ |      Args:
+ |          event (T): The event to listen for.
+ |          callback (Callable, optional): The callback to register. Defaults to None.
+ |
+ |      Returns:
+ |          Callable: The registered callback or a decorator if callback is None.
+ |
+ |      Example:
+ |          Using once with a direct callback:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          def greet_once(name):
+ |              print(f"Hello once, {name}!")
+ |
+ |          emitter.once('greet', greet_once)
+ |          emitter.emit('greet', 'Bob')    # Output: Hello once, Bob!
+ |          emitter.emit('greet', 'Bob')    # No output, callback was removed after first call
+ |          ```
+ |
+ |          Using once as a decorator:
+ |
+ |          ```python
+ |          emitter = EventEmitter[str]()
+ |
+ |          @emitter.once('greet')
+ |          def greet_once(name):
+ |              print(f"Hello once, {name}!")
+ |
+ |          emitter.emit('greet', 'Bob')    # Output: Hello once, Bob!
+ |          emitter.emit('greet', 'Bob')    # No output
+ |          ```
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from livekit.rtc.event_emitter.EventEmitter:
+ |
+ |  __dict__
+ |      dictionary for instance variables
+ |
+ |  __weakref__
+ |      list of weak references to the object
+ |
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from typing.Generic:
+ |
+ |  __class_getitem__(...)
+ |      Parameterizes a generic class.
+ |
+ |      At least, parameterizing a generic class is the *main* thing this
+ |      method does. For example, for some generic class `Foo`, this is called
+ |      when we do `Foo[int]` - there, with `cls=Foo` and `params=int`.
+ |
+ |      However, note that this method is also called when defining generic
+ |      classes in the first place with `class Foo[T]: ...`.
+ |
+ |  __init_subclass__(...)
+ |      Function to initialize subclasses.
+

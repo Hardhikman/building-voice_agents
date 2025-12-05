@@ -1,5 +1,5 @@
 import logging
-
+import asyncio
 from dotenv import load_dotenv
 from livekit.agents import (
     Agent,
@@ -20,183 +20,156 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 import json
 import os
 from datetime import datetime
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 
 logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
-
 class Assistant(Agent):
-    def __init__(self) -> None:
+    def __init__(self, mcp_client: ClientSession, context_summary: str = "This is the first check-in.") -> None:
+        self.mcp_client = mcp_client
         super().__init__(
-            instructions="""You are a friendly barista at Hard Coffee Shop. The user is interacting with you via voice.
-            Your job is to help customers place coffee orders by asking about their preferences in a natural, conversational way.
+            instructions=f"""You are a supportive, grounded Health & Wellness Voice Companion.
+            Your goal is to check in with the user about their mood and intentions for the day.
             
-            You need to collect the following information for each order:
-            - Drink type (e.g., Latte, Cappuccino, Espresso, Americano, Mocha, etc.)
-            - Quantity (Number of cups)
-            - Size (Small, Medium, or Large)
-            - Milk preference (Whole, Skim, Oat, Almond, Soy, or None for black coffee)
-            - Any extras (e.g., Extra shot, Whipped cream, Caramel drizzle, Vanilla syrup, etc.)
-            - Customer's name for the order
+            Context from previous session: {context_summary}
             
-            Ask for missing information naturally in conversation. Once you have all the details, confirm the complete order with the customer.
-            After confirmation, use the save_order tool to save their order.
+            Structure your conversation:
+            1. Start by greeting the user warmly and briefly mentioning their previous check-in (if available).
+            2. Ask about their mood and energy levels today.
+            3. Ask about 1-3 simple, actionable objectives for the day.
+            4. Offer brief, grounded advice or encouragement (non-medical).
+            5. Recap their mood and objectives to confirm.
+            6. Once confirmed, use the add_log tool to save the entry.
             
-            Be warm, friendly, and enthusiastic about coffee! Keep responses concise and conversational.
-            Do not use emojis, asterisks, or complex formatting in your responses.""",
-            functions=[self.save_order],
+            Be warm, empathetic, and concise. Avoid medical diagnoses.""",
         )
 
     @function_tool
-    async def save_order(
+    async def add_log(
         self,
         context: RunContext,
-        drink_type: str,
-        quantity: int,
-        size: str,
-        milk: str,
-        extras: list[str],
-        name: str
+        mood: str,
+        objectives: list[str],
+        summary: str
     ):
-        """Save the customer's coffee order to a JSON file.
-        
-        Use this tool ONLY after you have collected all order information and the customer has confirmed their order.
+        """Add a new wellness log entry.
         
         Args:
-            drink_type: Type of drink (e.g., Latte, Cappuccino, Espresso, Americano, Mocha)
-            quantity: Number of cups (integer)
-            size: Size of drink (Small, Medium, or Large)
-            milk: Type of milk (Whole, Skim, Oat, Almond, Soy, or None)
-            extras: List of extras/add-ons (e.g., ["Extra shot", "Whipped cream"]). Use empty list [] if no extras.
-            name: Customer's name for the order
+            mood: User's mood.
+            objectives: List of objectives.
+            summary: Agent's summary.
         """
-        # Create order object
-        order = {
-            "drinkType": drink_type,
-            "quantity": quantity,
-            "size": size,
-            "milk": milk,
-            "extras": extras,
-            "name": name,
-            "timestamp": datetime.now().isoformat(),
-            "orderNumber": datetime.now().strftime("%Y%m%d%H%M%S")
-        }
-        
-        # Create orders directory if it doesn't exist
-        orders_dir = "orders"
-        os.makedirs(orders_dir, exist_ok=True)
-        
-        # Generate filename with timestamp
-        filename = os.path.join(orders_dir, f"order_{order['orderNumber']}.json")
-        
-        # Save order to JSON file
-        with open(filename, 'w') as f:
-            json.dump(order, f, indent=2)
-        
-        logger.info(f"Order saved: {filename}")
-        logger.info(f"Order details: {order}")
-        
-        # Send order data to frontend via data channel
         try:
-            room = context.room
-            # Send as JSON string with a topic identifier
-            order_json = json.dumps({"type": "coffee_order", "order": order})
-            await room.local_participant.publish_data(
-                order_json.encode('utf-8'),
-                topic="coffee_order"
-            )
-            logger.info("Order data sent to frontend")
+            result = await self.mcp_client.call_tool("add_log", arguments={"mood": mood, "objectives": objectives, "summary": summary})
+            return str(result)
         except Exception as e:
-            logger.error(f"Failed to send order to frontend: {e}")
-        
-        return f"Perfect! Your order has been placed, {name}. {quantity} {size} {drink_type}(s) with {milk} will be ready soon. Your order number is {order['orderNumber']}. Thank you for visiting Brew Haven!"
-
+            logger.error(f"MCP call failed: {e}")
+            return "Failed to save log."
 
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
-
 async def entrypoint(ctx: JobContext):
-    # Logging setup
-    # Add any other context you want in all log entries here
     ctx.log_context_fields = {
         "room": ctx.room.name,
     }
 
-    # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
-    session = AgentSession(
-        # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
-        # See all available models at https://docs.livekit.io/agents/models/stt/
-        stt=cartesia.STT( model="ink-whisper"), #this can be changed to elevenlabs/deepgram/
-        # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
-        # See all available models at https://docs.livekit.io/agents/models/llm/
-        llm=google.LLM(
-                model="gemini-2.5-flash",
-            ),
-        # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
-        # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
-        tts=murf.TTS(
-                voice="en-US-matthew", 
-                style="Conversation",
-                tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
-                text_pacing=True
-            ),
-        # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
-        # See more at https://docs.livekit.io/agents/build/turns
-        turn_detection=MultilingualModel(),
-        vad=ctx.proc.userdata["vad"],
-        # allow the LLM to generate a response while waiting for the end of turn
-        # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
-        preemptive_generation=True,
+    # Connect to MCP Server
+    server_params = StdioServerParameters(
+        command="python",
+        args=["wellness_db_server.py"],
+        env=None
     )
 
-    # To use a realtime model instead of a voice pipeline, use the following session setup instead.
-    # (Note: This is for the OpenAI Realtime API. For other providers, see https://docs.livekit.io/agents/models/realtime/))
-    # 1. Install livekit-agents[openai]
-    # 2. Set OPENAI_API_KEY in .env.local
-    # 3. Add `from livekit.plugins import openai` to the top of this file
-    # 4. Use the following session setup instead of the version above
-    # session = AgentSession(
-    #     llm=openai.realtime.RealtimeModel(voice="marin")
-    # )
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            
+            # Load context from MCP
+            context_summary = "This is the first check-in."
+            try:
+                result = await session.call_tool("get_latest_log", arguments={})
+                if result and result.content:
+                     content_text = result.content[0].text
+                     if content_text != "No previous logs found.":
+                         log_data = json.loads(content_text)
+                         mood = log_data.get('mood', 'unknown')
+                         objs = log_data.get('objectives', [])
+                         objs_str = ', '.join(objs) if objs else 'none'
+                         context_summary = f"Previous check-in on {log_data.get('timestamp', 'unknown')}: Mood was {mood}, Goals were {objs_str}."
+            except Exception as e:
+                logger.error(f"Failed to load context from MCP: {e}")
 
-    # Metrics collection, to measure pipeline performance
-    # For more information, see https://docs.livekit.io/agents/build/metrics/
-    usage_collector = metrics.UsageCollector()
+            # Create agent with context
+            agent = Assistant(mcp_client=session, context_summary=context_summary)
 
-    @session.on("metrics_collected")
-    def _on_metrics_collected(ev: MetricsCollectedEvent):
-        metrics.log_metrics(ev.metrics)
-        usage_collector.collect(ev.metrics)
+            session_agent = AgentSession(
+                stt=cartesia.STT(model="ink-whisper"),
+                llm=google.LLM(model="gemini-2.5-flash-lite"),
+                tts=murf.TTS(
+                    voice="en-US-matthew", 
+                    style="Conversation",
+                    tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
+                    text_pacing=True
+                ),
+                turn_detection=MultilingualModel(),
+                vad=ctx.proc.userdata["vad"],
+                preemptive_generation=True,
+            )
 
-    async def log_usage():
-        summary = usage_collector.get_summary()
-        logger.info(f"Usage: {summary}")
+            usage_collector = metrics.UsageCollector()
 
-    ctx.add_shutdown_callback(log_usage)
+            @session_agent.on("metrics_collected")
+            def _on_metrics_collected(ev: MetricsCollectedEvent):
+                metrics.log_metrics(ev.metrics)
+                usage_collector.collect(ev.metrics)
 
-    # # Add a virtual avatar to the session, if desired
-    # # For other providers, see https://docs.livekit.io/agents/models/avatar/
-    # avatar = hedra.AvatarSession(
-    #   avatar_id="...",  # See https://docs.livekit.io/agents/models/avatar/plugins/hedra
-    # )
-    # # Start the avatar and wait for it to join
-    # await avatar.start(session, room=ctx.room)
+            async def log_usage():
+                summary = usage_collector.get_summary()
+                logger.info(f"Usage: {summary}")
 
-    # Start the session, which initializes the voice pipeline and warms up the models
-    await session.start(
-        agent=Assistant(),
-        room=ctx.room,
-        room_input_options=RoomInputOptions(
-            # For telephony applications, use `BVCTelephony` for best results
-            noise_cancellation=noise_cancellation.BVC(),
-        ),
-    )
+            ctx.add_shutdown_callback(log_usage)
 
-    # Join the room and connect to the user
-    await ctx.connect()
+            await session_agent.start(
+                agent=agent,
+                room=ctx.room,
+                room_input_options=RoomInputOptions(
+                    noise_cancellation=noise_cancellation.BVC(),
+                ),
+            )
 
+            await ctx.connect()
+            
+            # Keep the MCP session alive while the agent is running
+            # We need to wait until the room is disconnected
+            # ctx.connect() returns immediately? No, it waits for connection.
+            # But we need to keep the session open.
+            # The agent runs in the background.
+            # We can wait for the room to disconnect.
+            
+            # Actually, `ctx.connect()` connects to the room. The agent loop runs inside `session_agent`.
+            # We need to prevent the `async with` block from exiting.
+            # We can wait on a future that completes when the room disconnects.
+            
+            # LiveKit JobContext doesn't have a simple "wait until done" method that blocks?
+            # Usually the worker keeps running.
+            # But here we are inside `entrypoint`. If `entrypoint` returns, the job might end?
+            # Or `ctx.connect()` is just the start.
+            
+            # Let's look at how to keep it alive.
+            # We can create a future and resolve it on disconnect.
+            
+            shutdown_future = asyncio.Future()
+            
+            @ctx.room.on("disconnected")
+            def on_disconnected(reason):
+                if not shutdown_future.done():
+                    shutdown_future.set_result(None)
+            
+            await shutdown_future
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm))
