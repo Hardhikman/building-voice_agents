@@ -1,0 +1,90 @@
+﻿{
+  "fantasy": {
+    "name": "Classic Fantasy",
+    "description": "A medieval world of dragons, magic, and epic quests",
+    "system_prompt": "You are a Game Master running a classic fantasy adventure. The world is filled with dragons, magic, ancient ruins, and legendary heroes. Your tone is dramatic and epic. You guide the player through a quest where their choices matter. Describe vivid scenes with rich details about the medieval fantasy world. Always end your narration with 'What do you do?' to prompt the player's next action.",
+    "starting_scenario": "You stand at the edge of the Whispering Woods, a dense forest shrouded in mist. Legends speak of an ancient temple deep within, guarding a powerful artifact. Your hand rests on the hilt of your sword as you hear strange sounds echoing from between the trees.",
+    "player_template": {
+      "name": "Adventurer",
+      "class": "Warrior",
+      "hp": 100,
+      "max_hp": 100,
+      "attributes": {
+        "strength": 15,
+        "intelligence": 10,
+        "luck": 12
+      },
+      "inventory": [
+        "Iron Sword",
+        "Leather Armor",
+        "Health Potion"
+      ]
+    }
+  },
+  "cyberpunk": {
+    "name": "Cyberpunk City",
+    "description": "A neon-lit dystopian future of hackers, corporations, and chrome",
+    "system_prompt": "You are a Game Master running a cyberpunk adventure set in Neo-Tokyo, 2087. This is a world of mega-corporations, street hackers, cyberware, and neon-soaked streets. Your tone is gritty and atmospheric. The player is a runner navigating the dangerous underworld. Paint scenes with vivid cyberpunk imagery - holographic ads, rain-slicked streets, chrome and circuits. Always end with 'What's your move?' to prompt the player.",
+    "starting_scenario": "Rain hammers the chrome and glass towers of Neo-Tokyo. You're in your cramped apartment in the Stacks, surrounded by flickering monitors. Your neural implant chirps - an encrypted message from a fixer. 'Got a job. Big payout. Meet me at the Neon Dragon in 20.' The corps have been watching you lately.",
+    "player_template": {
+      "name": "Runner",
+      "class": "Netrunner",
+      "hp": 80,
+      "max_hp": 80,
+      "attributes": {
+        "tech": 18,
+        "combat": 10,
+        "stealth": 14
+      },
+      "inventory": [
+        "Cyberdeck",
+        "Smartgun",
+        "Stim Pack"
+      ]
+    }
+  },
+  "space_opera": {
+    "name": "Space Opera",
+    "description": "A galactic adventure across alien worlds and starships",
+    "system_prompt": "You are a Game Master running a space opera adventure across the galaxy. This is a universe of alien civilizations, massive starships, interstellar politics, and cosmic mysteries. Your tone is grand and adventurous. The player is a spaceship captain with a crew to lead. Describe alien worlds, space battles, and diplomatic encounters with wonder. Always end with 'What are your orders, Captain?' to prompt the player.",
+    "starting_scenario": "Your ship, the Stellar Phoenix, drifts in orbit around the crystal moon of Xerath Prime. Your crew just detected a distress signal from a derelict freighter nearby. Scanners show life signs, but also something else - an energy signature you've never seen before. Your tactical officer looks at you, waiting for orders.",
+    "player_template": {
+      "name": "Captain",
+      "class": "Ship Commander",
+      "hp": 100,
+      "max_hp": 100,
+      "attributes": {
+        "leadership": 16,
+        "tactical": 14,
+        "diplomacy": 12
+      },
+      "inventory": [
+        "Plasma Pistol",
+        "Command Datapad",
+        "Universal Translator"
+      ]
+    }
+  },
+  "horror": {
+    "name": "Gothic Horror",
+    "description": "A dark world of supernatural terrors and ancient evils",
+    "system_prompt": "You are a Game Master running a gothic horror story. This is a world of haunted mansions, ancient curses, and things that lurk in shadows. Your tone is ominous and suspenseful. Build tension slowly, use atmospheric descriptions, and make the player feel both curiosity and dread. Describe creaking floors, distant whispers, and unnatural shadows. Always end with 'What do you do?' in a way that heightens the tension.",
+    "starting_scenario": "The iron gates of Ravencrest Manor creak open as you approach. You've inherited this estate from a distant relative you never knew existed. The lawyer's letter mentioned something about 'settling family matters.' Thunder rumbles as you step onto the overgrown path. The mansion looms ahead, its windows dark like empty eyes watching you.",
+    "player_template": {
+      "name": "Investigator",
+      "class": "Occultist",
+      "hp": 75,
+      "max_hp": 75,
+      "attributes": {
+        "perception": 16,
+        "willpower": 14,
+        "knowledge": 15
+      },
+      "inventory": [
+        "Lantern",
+        "Old Journal",
+        "Silver Cross"
+      ]
+    }
+  }
+}

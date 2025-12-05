@@ -67,6 +67,8 @@ orders/
 !day4_tutor_content.json
 !company_data.json
 !lead_data.json
+!food_catalog.json
+!game_universes.json
 
 # Lock files (keep these)
 !pnpm-lock.yaml

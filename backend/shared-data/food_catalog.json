@@ -1,0 +1,229 @@
+{
+    "categories": {
+        "groceries": [
+            {
+                "id": "bread_whole_wheat",
+                "name": "Whole Wheat Bread",
+                "category": "groceries",
+                "price": 3.99,
+                "unit": "loaf",
+                "brand": "Nature's Own",
+                "tags": [
+                    "healthy",
+                    "grains",
+                    "vegan"
+                ]
+            },
+            {
+                "id": "milk_whole",
+                "name": "Whole Milk",
+                "category": "groceries",
+                "price": 4.29,
+                "unit": "gallon",
+                "brand": "Organic Valley",
+                "tags": [
+                    "dairy",
+                    "calcium",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "eggs_dozen",
+                "name": "Large Eggs",
+                "category": "groceries",
+                "price": 5.49,
+                "unit": "dozen",
+                "brand": "Farm Fresh",
+                "tags": [
+                    "protein",
+                    "breakfast",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "peanut_butter_creamy",
+                "name": "Creamy Peanut Butter",
+                "category": "groceries",
+                "price": 4.99,
+                "unit": "jar",
+                "brand": "Jif",
+                "tags": [
+                    "protein",
+                    "spread",
+                    "vegan",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "jelly_strawberry",
+                "name": "Strawberry Jelly",
+                "category": "groceries",
+                "price": 3.49,
+                "unit": "jar",
+                "brand": "Smucker's",
+                "tags": [
+                    "sweet",
+                    "spread",
+                    "vegan",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "pasta_spaghetti",
+                "name": "Spaghetti Pasta",
+                "category": "groceries",
+                "price": 1.99,
+                "unit": "box",
+                "brand": "Barilla",
+                "tags": [
+                    "grains",
+                    "dinner",
+                    "vegan"
+                ]
+            },
+            {
+                "id": "pasta_sauce_marinara",
+                "name": "Marinara Sauce",
+                "category": "groceries",
+                "price": 3.99,
+                "unit": "jar",
+                "brand": "Prego",
+                "tags": [
+                    "sauce",
+                    "dinner",
+                    "vegan",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "apples_red_delicious",
+                "name": "Red Delicious Apples",
+                "category": "groceries",
+                "price": 0.99,
+                "unit": "lb",
+                "brand": "Fresh",
+                "tags": [
+                    "fruit",
+                    "healthy",
+                    "vegan",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "bananas",
+                "name": "Bananas",
+                "category": "groceries",
+                "price": 0.59,
+                "unit": "lb",
+                "brand": "Chiquita",
+                "tags": [
+                    "fruit",
+                    "healthy",
+                    "vegan",
+                    "gluten-free"
+                ]
+            }
+        ],
+        "snacks": [
+            {
+                "id": "chips_potato",
+                "name": "Potato Chips",
+                "category": "snacks",
+                "price": 4.49,
+                "unit": "bag",
+                "brand": "Lay's",
+                "tags": [
+                    "salty",
+                    "party",
+                    "gluten-free"
+                ]
+            },
+            {
+                "id": "cookies_chocolate_chip",
+                "name": "Chocolate Chip Cookies",
+                "category": "snacks",
+                "price": 3.99,
+                "unit": "pack",
+                "brand": "Chips Ahoy",
+                "tags": [
+                    "sweet",
+                    "dessert"
+                ]
+            }
+        ],
+        "prepared_food": [
+            {
+                "id": "pizza_pepperoni",
+                "name": "Pepperoni Pizza",
+                "category": "prepared_food",
+                "price": 12.99,
+                "unit": "large",
+                "brand": "Fresh Made",
+                "tags": [
+                    "dinner",
+                    "hot"
+                ]
+            },
+            {
+                "id": "sandwich_turkey",
+                "name": "Turkey Sandwich",
+                "category": "prepared_food",
+                "price": 7.99,
+                "unit": "each",
+                "brand": "Fresh Made",
+                "tags": [
+                    "lunch",
+                    "cold"
+                ]
+            }
+        ]
+    },
+    "recipes": {
+        "peanut_butter_sandwich": {
+            "name": "Peanut Butter & Jelly Sandwich",
+            "description": "A classic PB&J sandwich.",
+            "ingredients": [
+                {
+                    "item_id": "bread_whole_wheat",
+                    "quantity": 1
+                },
+                {
+                    "item_id": "peanut_butter_creamy",
+                    "quantity": 1
+                },
+                {
+                    "item_id": "jelly_strawberry",
+                    "quantity": 1
+                }
+            ]
+        },
+        "pasta_dinner": {
+            "name": "Spaghetti Dinner",
+            "description": "A simple spaghetti marinara dinner.",
+            "ingredients": [
+                {
+                    "item_id": "pasta_spaghetti",
+                    "quantity": 1
+                },
+                {
+                    "item_id": "pasta_sauce_marinara",
+                    "quantity": 1
+                }
+            ]
+        },
+        "fruit_salad": {
+            "name": "Fruit Salad",
+            "description": "Refreshing fruit salad with apples and bananas.",
+            "ingredients": [
+                {
+                    "item_id": "apples_red_delicious",
+                    "quantity": 3
+                },
+                {
+                    "item_id": "bananas",
+                    "quantity": 3
+                }
+            ]
+        }
+    }
+}
