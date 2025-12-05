@@ -1,6 +1,6 @@
-# AI Voice Agents Challenge - Starter Repository
+# Ten Days of Voice Agents 2025
 
-Welcome to the **AI Voice Agents Challenge** by [murf.ai](https://murf.ai)!
+Welcome to the **Ten Days of Voice Agents Challenge** by [murf.ai](https://murf.ai)!
 
 ## About the Challenge
 
@@ -10,7 +10,7 @@ We just launched **Murf Falcon** – the consistently fastest TTS API, and you'r
 
 ### How It Works
 
-- One task to be provided everyday along with a GitHub repo for reference
+- One task is provided every day along with a GitHub repo for reference
 - Build a voice agent with specific personas and skills
 - Post on GitHub and share with the world on LinkedIn!
 
@@ -19,26 +19,61 @@ We just launched **Murf Falcon** – the consistently fastest TTS API, and you'r
 This is a **monorepo** that contains both the backend and frontend for building voice agent applications. It's designed to be your starting point for each day's challenge task.
 
 ```
-falcon-tdova-nov25-livekit/
-├── backend/          # LiveKit Agents backend with Murf Falcon TTS
-├── frontend/         # React/Next.js frontend for voice interaction
-├── start_app.sh      # Convenience script to start all services
-└── README.md         # This file
+ten-days-of-voice-agents-2025/
+├── backend/              # LiveKit Agents backend with Murf Falcon TTS
+│   └── src/
+│       ├── agent.py              # Main wellness agent
+│       ├── agent_food_ordering.py # Food ordering agent (Day 2)
+│       ├── agent_game_master.py   # Game master agent (Day 3)
+│       ├── agent_sdr.py           # SDR/Sales agent (Day 4)
+│       └── db.py                  # Database utilities
+├── frontend/             # React/Next.js frontend for voice interaction
+├── challenges/           # Daily challenge task descriptions
+│   ├── Day 1 Task.md
+│   ├── Day 2 Task.md
+│   ├── Day 3 Task.md
+│   ├── Day 4 Task.md
+│   ├── Day 5 Task.md
+│   ├── Day 7 Task.md
+│   ├── Day 8 Task.md
+│   └── Day 10 Task.md
+├── bin/                  # Pre-built LiveKit server binary (Windows)
+├── start_app.ps1         # PowerShell script to start all services (Windows)
+├── install_livekit.ps1   # LiveKit server installation script (Windows)
+└── README.md             # This file
 ```
 
 ### Backend
 
 The backend is based on [LiveKit's agent-starter-python](https://github.com/livekit-examples/agent-starter-python) with modifications to integrate **Murf Falcon TTS** for ultra-fast, high-quality voice synthesis.
 
+**Tech Stack:**
+
+| Component | Provider | Model |
+|-----------|----------|-------|
+| **STT** (Speech-to-Text) | Cartesia | `ink-whisper` |
+| **LLM** (Large Language Model) | Google | `gemini-2.5-flash` |
+| **TTS** (Text-to-Speech) | Murf Falcon | `en-US-matthew` |
+| **VAD** (Voice Activity Detection) | Silero | Default |
+| **Turn Detection** | LiveKit | Multilingual Model |
+
 **Features:**
 
-- Complete voice AI agent framework using LiveKit Agents
-- Murf Falcon TTS integration for fastest text-to-speech
-- LiveKit Turn Detector for contextually-aware speaker detection
-- Background voice cancellation
-- Integrated metrics and logging
-- Complete test suite with evaluation framework
-- Production-ready Dockerfile
+- 🎤 Complete voice AI pipeline (STT → LLM → TTS)
+- 🚀 Murf Falcon TTS integration for ultra-fast speech synthesis
+- 🧠 Google Gemini 2.5 Flash for intelligent responses
+- 🌍 Multilingual turn detection support
+- 🔇 Background voice cancellation
+- ⚡ Preemptive generation for low latency
+- 📊 Integrated metrics and logging
+- 🐳 Production-ready Dockerfile
+
+**Agent Implementations:**
+
+- `agent.py` - Wellness coach agent (Day 1)
+- `agent_food_ordering.py` - Food ordering assistant (Day 2)
+- `agent_game_master.py` - Interactive game master (Day 3)
+- `agent_sdr.py` - Sales development representative (Day 4)
 
 [→ Backend Documentation](./backend/README.md)
 
@@ -66,13 +101,12 @@ Make sure you have the following installed:
 - Python 3.9+ with [uv](https://docs.astral.sh/uv/) package manager
 - Node.js 18+ with pnpm
 - [LiveKit CLI](https://docs.livekit.io/home/cli/cli-setup) (optional but recommended)
-- [LiveKit Server](https://docs.livekit.io/home/self-hosting/local/) for local development
 
 ### 1. Clone the Repository
 
 ```bash
 git clone <your-repo-url>
-cd falcon-tdova-nov25-livekit
+cd ten-days-of-voice-agents-2025
 ```
 
 ### 2. Backend Setup
@@ -92,7 +126,7 @@ cp .env.example .env.local
 # - LIVEKIT_API_SECRET
 # - MURF_API_KEY (for Falcon TTS)
 # - GOOGLE_API_KEY (for Gemini LLM)
-# - DEEPGRAM_API_KEY (for Deepgram STT)
+# - CARTESIA_API_KEY (for Cartesia STT)
 
 # Download required models
 uv run python src/agent.py download-files
@@ -121,33 +155,26 @@ cp .env.example .env.local
 
 ### 4. Run the Application
 
-#### Install livekit server
+#### Windows (PowerShell)
 
-```bash
-brew install livekit
-```
+Use the convenience script to start all services:
 
-You have two options:
-
-#### Option A: Use the convenience script (runs everything)
-
-```bash
+```powershell
 # From the root directory
-chmod +x start_app.sh
-./start_app.sh
+.\start_app.ps1
 ```
 
 This will start:
-
-- LiveKit Server (in dev mode)
+- LiveKit Server (from `bin/livekit-server.exe`)
 - Backend agent (listening for connections)
 - Frontend app (at http://localhost:3000)
 
-#### Option B: Run services individually
+#### Manual Start (All Platforms)
 
 ```bash
 # Terminal 1 - LiveKit Server
-livekit-server --dev
+# Windows: .\bin\livekit-server.exe --dev
+# Mac/Linux: livekit-server --dev
 
 # Terminal 2 - Backend Agent
 cd backend
@@ -162,26 +189,27 @@ Then open http://localhost:3000 in your browser!
 
 ## Daily Challenge Tasks
 
-Each day, you'll receive a new task that builds upon your voice agent. The tasks will help you:
+Check the `challenges/` directory for daily task descriptions. Each day builds upon your voice agent with new capabilities:
 
-- Implement different personas and conversation styles
-- Add custom tools and capabilities
-- Integrate with external APIs
-- Build domain-specific agents (customer service, tutoring, etc.)
-- Optimize performance and user experience
-
-**Stay tuned for daily task announcements!**
+| Day | Task | Agent |
+|-----|------|-------|
+| 1 | Wellness Coach | `agent.py` |
+| 2 | Food Ordering | `agent_food_ordering.py` |
+| 3 | Game Master | `agent_game_master.py` |
+| 4 | SDR/Sales | `agent_sdr.py` |
+| 5-10 | Advanced Challenges | See `challenges/` |
 
 ## Documentation & Resources
 
 - [Murf Falcon TTS Documentation](https://murf.ai/api/docs/text-to-speech/streaming)
 - [LiveKit Agents Documentation](https://docs.livekit.io/agents)
+- [LiveKit Agents Models](https://docs.livekit.io/agents/models)
 - [Original Backend Template](https://github.com/livekit-examples/agent-starter-python)
 - [Original Frontend Template](https://github.com/livekit-examples/agent-starter-react)
 
 ## Testing
 
-The backend includes a comprehensive test suite:
+The backend includes a test suite:
 
 ```bash
 cd backend
@@ -211,4 +239,4 @@ Good luck with the challenge!
 
 ---
 
-Built for the AI Voice Agents Challenge by murf.ai
+Built for the Ten Days of Voice Agents Challenge by [murf.ai](https://murf.ai)
