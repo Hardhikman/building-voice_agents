@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
+import { OrderReceipt } from '@/components/app/order-receipt';
 import type { AppConfig } from '@/app-config';
 import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
@@ -103,6 +104,9 @@ export const SessionView = ({
           />
         </ScrollArea>
       </div>
+
+      {/* Order Receipt Overlay */}
+      <OrderReceipt />
 
       {/* Tile Layout */}
       <TileLayout chatOpen={chatOpen} />
